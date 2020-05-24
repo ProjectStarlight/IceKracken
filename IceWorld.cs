@@ -83,7 +83,7 @@ namespace IceKracken
         {
             if(!Main.npc.Any(n => n.active && n.type == ModContent.NPCType<Boss.ArenaActor>()))
             {
-                NPC.NewNPC(IceZone.Center.X * 16 + 200, IceZone.Center.Y * 16 - 342, ModContent.NPCType<Boss.ArenaActor>());
+                NPC.NewNPC(IceZone.Center.X * 16 + 200, IceZone.Center.Y * 16 - 352, ModContent.NPCType<Boss.ArenaActor>());
             }
         }
 

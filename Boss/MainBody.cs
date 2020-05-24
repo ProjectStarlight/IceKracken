@@ -101,7 +101,7 @@ namespace IceKracken.Boss
                         int x;
                         int y;
                         int xb;
-                        switch (k)
+                        switch (k) //I handle these manually to get them to line up with the window correctly
                         {
                             case 0: x = -370; y = 0; xb = -50; break;
                             case 1: x = -420; y = -100; xb = -20; break;
