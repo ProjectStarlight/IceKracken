@@ -1,0 +1,4 @@
+displayName = Krack My Nuts
+author = Scalie
+version = 0.1
+modReferences = StructureHelper
