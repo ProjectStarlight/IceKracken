@@ -26,6 +26,18 @@ namespace IceKracken.Boss
         {
             npc.ai[3] = 0;
         }
+        private void ShufflePlatforms()
+        {
+            int n = Platforms.Count(); //fisher yates
+            while (n > 1)
+            {
+                n--;
+                int k = Main.rand.Next(n + 1);
+                NPC value = Platforms[k];
+                Platforms[k] = Platforms[n];
+                Platforms[n] = value;
+            }
+        }
         private void TentacleSpike()
         {
             RandomizeTarget();
@@ -56,14 +68,54 @@ namespace IceKracken.Boss
                     Tentacles[k].Center = Vector2.SmoothStep(tentacle.MovePoint, tentacle.SavedPoint, time / 210f);
                 }
             }
-            if (npc.ai[3] == 660) ResetAttack();
+            if (npc.ai[3] == 600) ResetAttack();
         }
         private void InkBurst()
         {
-
+            for (float k = 0; k <= 3.14f; k += 3.14f / 5f)
+            {
+                if(npc.ai[3] % 3 == 0) Projectile.NewProjectile(npc.Center + new Vector2(0, 100), new Vector2(-10, 0).RotatedBy(k), ModContent.ProjectileType<InkBlob>(), 10, 0.2f, 255, 0, Main.rand.NextFloat(6.28f));
+                if(npc.ai[3] == 60) ResetAttack();
+            }
         }
         public void PlatformSweep()
         {
+            if (npc.ai[3] == 1) //start by randomizing the platform order and assigning targets
+            {
+                ShufflePlatforms();
+                for (int k = 0; k < 4; k++)
+                {
+                    Tentacle tentacle = Tentacles[k].modNPC as Tentacle;
+                    Tentacles[k].Center = new Vector2(Platforms[k].Center.X, Tentacles[k].Center.Y);
+                    tentacle.SavedPoint = Tentacles[k].Center;
+                    tentacle.MovePoint = Platforms[k].Center + new Vector2(0, -70);
+                }
+            }
+            if (npc.ai[3] > 60 && npc.ai[3] < 120) //rising
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    Tentacle tentacle = Tentacles[k].modNPC as Tentacle;
+                    Tentacles[k].Center = Vector2.SmoothStep(tentacle.SavedPoint, tentacle.MovePoint, (npc.ai[3] - 60) / 60f);
+                }
+            }
+            if(npc.ai[3] > 120 && npc.ai[3] < 360) //waving around
+            {
+                for(int k = 0; k < 4; k++)
+                {
+                    Tentacles[k].position.X += (float)Math.Sin(npc.ai[3] / 10f + k) * 2;
+                    Tentacles[k].position.Y += (float)Math.Cos(npc.ai[3] / 10f + k) * 4;
+                }
+            }
+            if (npc.ai[3] > 360 && npc.ai[3] < 420) //going back
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    Tentacle tentacle = Tentacles[k].modNPC as Tentacle;
+                    Tentacles[k].Center = Vector2.SmoothStep(tentacle.MovePoint, tentacle.SavedPoint, (npc.ai[3] - 360) / 60f);
+                }
+            }
+            if (npc.ai[3] == 420) ResetAttack();
 
         }
     }

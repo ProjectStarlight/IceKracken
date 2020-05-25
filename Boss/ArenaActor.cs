@@ -51,17 +51,26 @@ namespace IceKracken.Boss
 
             if (!Main.npc.Any(n => n.active && n.modNPC is IcePlatform))
             {
-                SpawnPlatform(-600, 200);
-                SpawnPlatform(600, 200);
+                SpawnPlatform(-640, 200);
+                SpawnPlatform(640, 200);
 
                 SpawnPlatform(-400, -50);
                 SpawnPlatform(400, -50);
 
-                SpawnPlatform(-150, -320);
-                SpawnPlatform(150, -320);
+                SpawnPlatform(-150, -260);
+                SpawnPlatform(150, -260);
 
-                SpawnPlatform(-250, -150, true);
-                SpawnPlatform(250, -150, true);
+                SpawnPlatform(-240, -150, true);
+                SpawnPlatform(240, -150, true);
+
+                SpawnPlatform(-460, 30, true);
+                SpawnPlatform(460, 30, true);
+
+                SpawnPlatform(-140, 300, true);
+                SpawnPlatform(140, 300, true);
+
+                SpawnPlatform(-340, 240, true);
+                SpawnPlatform(340, 240, true);
             }
 
             Vector2 pos = npc.Center + new Vector2(-1600, 35 * 16) + new Vector2(0, -npc.ai[0]);

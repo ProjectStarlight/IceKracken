@@ -36,7 +36,7 @@ namespace IceKracken.Boss
         public override bool CheckActive() => false;
         public void DrawUnderWater(SpriteBatch spriteBatch)
         {
-            if(Parent != null)
+            if (Parent != null)
             {
                 Texture2D top = ModContent.GetTexture("IceKracken/Boss/TentacleTop");
                 Texture2D body = ModContent.GetTexture("IceKracken/Boss/TentacleBody");
@@ -44,35 +44,65 @@ namespace IceKracken.Boss
 
                 float dist = npc.Center.X - Parent.npc.Center.X;
 
-                if (npc.ai[0] == (int)TentacleStates.SpawnAnimation)
+
+                int underMax = 0;
+                underMax = (int)(npc.ai[1] / 60 * 40);
+                if (underMax > 40) underMax = 40;
+
+                if (Parent.npc.ai[0] != (int)MainBody.AIStates.SpawnAnimation)
                 {
-                    int underMax = 0;
-                    underMax = (int)(npc.ai[1] / 60 * 40);
-                    if (underMax > 40) underMax = 40;
-                    for(int k = 0; k < underMax; k++)
-                    {
-                        Vector2 pos = Parent.npc.Center + new Vector2(OffBody - 9 + (float)Math.Sin(npc.ai[1] / 20f + k) * 2, 100 + k * 10);
-                        spriteBatch.Draw(body, pos - Main.screenPosition, Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16));
-                    }
+                    NPC actor = Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor);
+                    underMax = (int)(actor.Center.Y - Parent.npc.Center.Y / 10f);
+                }
+                for (int k = 0; k < underMax; k++)
+                {
+                    Vector2 pos = Parent.npc.Center + new Vector2(OffBody - 9 + (float)Math.Sin(npc.ai[1] / 20f + k) * 2, 100 + k * 10);
+                    spriteBatch.Draw(body, pos - Main.screenPosition, Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16));
                 }
 
-                if(npc.ai[1] > 60)
+
+                if (npc.ai[1] > 60)
                 {
                     spriteBatch.Draw(top, npc.Center - Main.screenPosition, top.Frame(), Lighting.GetColor((int)npc.Center.X / 16, (int)npc.Center.Y / 16), 0, top.Size() / 2, 1, 0, 0);
 
-                    for(int k = 0; k < Vector2.Distance(npc.Center + new Vector2(0, npc.height / 2), SavedPoint) / 10f; k++)
+                    for (int k = 0; k < Vector2.Distance(npc.Center + new Vector2(0, npc.height / 2), SavedPoint) / 10f; k++)
                     {
                         Vector2 pos = new Vector2((float)Math.Sin(npc.ai[1] / 20f + k) * 4, 0) + Vector2.Lerp(npc.Center + new Vector2(0, npc.height / 2), SavedPoint, k / Vector2.Distance(npc.Center + new Vector2(0, npc.height / 2), SavedPoint) * 10f);
                         spriteBatch.Draw(body, pos - Main.screenPosition, body.Frame(), Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16), 0, body.Size() / 2, 1, 0, 0);
                     }
 
+                    Color color;
+                    switch (npc.ai[0])
+                    {
+                        case 1: color = Color.LightPink; break;
+                        case 0: color = Color.LimeGreen; break;
+                        case 2: color = Color.Red; break;
+                        default: color = Color.Black; break;
+                    }
+
                     int squish = (int)(Math.Sin(npc.ai[1] * 0.1f) * 5);
                     Rectangle rect = new Rectangle((int)(npc.Center.X - Main.screenPosition.X), (int)(npc.Center.Y - Main.screenPosition.Y) + 40, 34 - squish, 16 + (int)(squish * 0.4f));
-                    spriteBatch.Draw(ring, rect, ring.Frame(), (npc.ai[2] == 1 ? Color.LimeGreen : Color.LightPink) * 0.6f, 0, ring.Size() / 2, 0, 0);
+                    spriteBatch.Draw(ring, rect, ring.Frame(), color * 0.6f, 0, ring.Size() / 2, 0, 0);
                 }
             }
         }
 
+        public override bool CheckDead()
+        {
+            npc.life = 1;
+            npc.ai[0] = 2;
+            return false;
+        }
+        public override void ModifyHitByProjectile(Projectile projectile, ref int damage, ref float knockback, ref bool crit, ref int hitDirection)
+        {
+            if (npc.life < damage) damage = npc.life;
+            Parent.npc.life -= damage;
+        }
+        public override void ModifyHitByItem(Player player, Item item, ref int damage, ref float knockback, ref bool crit)
+        {
+            if (npc.life < damage) damage = npc.life;
+            Parent.npc.life -= damage;
+        }
         public override void AI()
         {
             /* AI fields:
@@ -81,17 +111,18 @@ namespace IceKracken.Boss
              * 2: attack
              * 3: attack timer
              */
-            if (npc.ai[0] == 0 && npc.ai[1] == 0) SavedPoint = npc.Center;
+            npc.dontTakeDamage = npc.ai[0] != 0;
+
+            if ((npc.ai[0] == 0 || npc.ai[0] == 1) && npc.ai[1] == 0) SavedPoint = npc.Center;
             npc.ai[1]++;
 
-            if(npc.ai[0] == (int)TentacleStates.SpawnAnimation)
+
+            if (npc.ai[1] >= 60 && npc.ai[1] < 120) //spawning animation logic
             {
-                if(npc.ai[1] >= 60 && npc.ai[1] < 120)
-                {
-                    npc.Center = Vector2.SmoothStep(SavedPoint, MovePoint, (npc.ai[1] - 60) / 60f);
-                }
+                npc.Center = Vector2.SmoothStep(SavedPoint, MovePoint, (npc.ai[1] - 60) / 60f);
             }
-            if(Parent == null || !Parent.npc.active)
+
+            if (Parent == null || !Parent.npc.active)
             {
                 npc.active = false;
             }

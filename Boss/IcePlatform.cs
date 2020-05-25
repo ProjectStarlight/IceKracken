@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace IceKracken.Boss
 {
@@ -41,12 +42,18 @@ namespace IceKracken.Boss
         }
     }
 
-    class IcePlatformSmall : MovingPlatform
+    class IcePlatformSmall : MovingPlatform, IUnderwater
     {
+        public override bool PreDraw(SpriteBatch spriteBatch, Color drawColor) => false;
+        public void DrawUnderWater(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(ModContent.GetTexture(Texture), npc.position - Main.screenPosition, Lighting.GetColor((int)npc.Center.X / 16, (int)npc.Center.Y / 16));
+        }
+
         public override void SafeSetDefaults()
         {
             npc.width = 100;
-            npc.height = 16;
+            npc.height = 20;
         }
         public override void SafeAI()
         {
@@ -54,8 +61,15 @@ namespace IceKracken.Boss
 
             if (Main.player.Any(player => player.active && player.Hitbox.Intersects(npc.Hitbox)))
             {
-                if(npc.velocity.Y < 6)
-                npc.velocity.Y += 0.1f;
+                Dust.NewDust(npc.position, npc.width, npc.height, Terraria.ID.DustID.Ice);
+                npc.ai[1]++;
+            }
+            else npc.ai[1] = 0;
+
+            if(npc.ai[1] >= 20)
+            {
+                if (npc.velocity.Y < 8)
+                    npc.velocity.Y += 0.3f;
             }
             else if (npc.position.Y > npc.ai[0]) npc.velocity.Y = -1;
             else npc.velocity.Y = 0;
