@@ -17,6 +17,7 @@ namespace IceKracken.Boss
         Vector2 Spawn;
 
         #region TML hooks
+        public override string Texture => "IceKracken/Invisible";
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("[PH] Frost Kracken");
@@ -126,6 +127,34 @@ namespace IceKracken.Boss
                     }
                 }
                 if (npc.ai[1] > 700) npc.ai[0] = (int)AIStates.FirstPhase;
+            }
+
+            if(npc.ai[0] == (int)AIStates.FirstPhase) //first phase, part 1. Tentacle attacks and ink.
+            {
+                npc.ai[3]++;
+                if(npc.ai[3] == 1)
+                {
+                    npc.ai[2]++;
+                    if(npc.ai[2] > 1)
+                    {
+                        npc.ai[2] = 1;
+                    }
+                }
+                switch (npc.ai[2])
+                {
+                    case 0: //cycle attack
+                        break;
+                    case 1: //tentacle attack
+                        TentacleSpike();
+                        break;
+                    case 2: //ink burst
+                        InkBurst();
+                        break;
+                    case 3: //platform attack
+                        PlatformSweep();
+                        break;
+                }
+
             }
         }
         #endregion
