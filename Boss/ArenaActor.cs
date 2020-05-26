@@ -54,8 +54,8 @@ namespace IceKracken.Boss
                 SpawnPlatform(-640, 200);
                 SpawnPlatform(640, 200);
 
-                SpawnPlatform(-400, -50);
-                SpawnPlatform(400, -50);
+                SpawnPlatform(-400, -70);
+                SpawnPlatform(400, -70);
 
                 SpawnPlatform(-150, -260);
                 SpawnPlatform(150, -260);

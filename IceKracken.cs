@@ -36,9 +36,19 @@ namespace IceKracken
             customResourcesBar.SetState(lifeBar);
 
             On.Terraria.Player.Update_NPCCollision += PlatformCollision;
+            On.Terraria.Main.DrawInterface += DrawBlingBlingBoy;
 
             IL.Terraria.Projectile.VanillaAI += GrapplePlatforms;
             IL.Terraria.Main.DoDraw += DrawWater;
+        }
+
+        private void DrawBlingBlingBoy(On.Terraria.Main.orig_DrawInterface orig, Main self, GameTime gameTime)
+        {
+            orig(self, gameTime);
+            Main.spriteBatch.Begin();
+            //if(Main.rand.Next(10) == 0)
+            Main.spriteBatch.Draw(ModContent.GetTexture("IceKracken/Bling"), new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * 0f);
+            Main.spriteBatch.End();
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -140,6 +150,10 @@ namespace IceKracken
                 foreach (NPC npc3 in Main.npc.Where(n => n.active && n.modNPC is MainBody))
                 {
                     (npc3.modNPC as IUnderwater).DrawUnderWater(Main.spriteBatch);
+                }
+                foreach (Projectile proj in Main.projectile.Where(n => n.active && n.modProjectile is IUnderwater))
+                {
+                    (proj.modProjectile as IUnderwater).DrawUnderWater(Main.spriteBatch);
                 }
 
                 (Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).modNPC as ArenaActor).SpecialDraw(Main.spriteBatch);

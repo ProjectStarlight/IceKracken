@@ -16,12 +16,13 @@ namespace IceKracken.Boss
         public List<NPC> Tentacles = new List<NPC>(); //the tentacle NPCs which this boss controls
         public List<NPC> Platforms = new List<NPC>(); //the big platforms the boss' arena has
         Vector2 Spawn;
+        Vector2 SavedPoint;
 
         #region TML hooks
         public override string Texture => "IceKracken/Invisible";
         public override void SetStaticDefaults()
         {
-            DisplayName.SetDefault("[PH] Frost Kracken");
+            DisplayName.SetDefault("Auroracle");
         }
         public override void SetDefaults()
         {
@@ -36,7 +37,7 @@ namespace IceKracken.Boss
             music = mod.GetSoundSlot(SoundType.Music, "Sounds/Music/SquidBoss");
             npc.noTileCollide = true;
             npc.knockBackResist = 0;
-            npc.immortal = true;
+            npc.dontTakeDamage = true;
         }
         public override bool CheckActive() => false;
         public void DrawUnderWater(SpriteBatch spriteBatch)
@@ -52,7 +53,7 @@ namespace IceKracken.Boss
                 float cos = 1 + (float)Math.Cos(npc.ai[1] / 10f + k);
                 Color color = new Color(0.5f + cos * 0.2f, 0.8f, 0.5f + sin * 0.2f) * 0.7f;
 
-                spriteBatch.Draw(tex2, rect, tex2.Frame(), color, 0, tex2.Size() / 2, 0, 0);
+                spriteBatch.Draw(tex2, rect, tex2.Frame(), color, npc.rotation, tex2.Size() / 2, 0, 0);
             }
 
             Texture2D tex = ModContent.GetTexture("IceKracken/Boss/BodyUnder");
@@ -87,13 +88,14 @@ namespace IceKracken.Boss
 
                 Spawn = npc.Center;
 
-                (mod as IceKracken).introText.Display("I'm Bad at Names", "Aurora Calamari", 600);
+                (mod as IceKracken).introText.Display("Auroracle", "Aurora Calamari", 600);
                 Main.LocalPlayer.GetModPlayer<IcePlayer>().ScreenMoveTarget = npc.Center;
                 Main.LocalPlayer.GetModPlayer<IcePlayer>().ScreenMovePan = npc.Center + new Vector2(0, -600);
                 Main.LocalPlayer.GetModPlayer<IcePlayer>().ScreenMoveTime = 600;
 
                 IceKracken.Instance.lifeBar.TrackingNPC = npc;
             }
+
             if (npc.ai[0] == (int)AIStates.SpawnAnimation)
             {
                 if (npc.ai[1] < 200)
@@ -144,6 +146,7 @@ namespace IceKracken.Boss
                     {
                         npc.ai[0] = (int)AIStates.FirstPhaseTwo;
                         npc.ai[1] = 0;
+                        return;
                     }
                     else //else advance the attack pattern
                     {
@@ -190,6 +193,7 @@ namespace IceKracken.Boss
                         {
                             npc.ai[0] = (int)AIStates.SecondPhase;
                             npc.ai[1] = 0;
+                            return;
                         }
                         else //else advance the attack pattern
                         {
@@ -216,11 +220,44 @@ namespace IceKracken.Boss
                     }
                 }
             }
+
             if (npc.ai[0] == (int)AIStates.SecondPhase) //second phase
             {
                 if (npc.ai[1] < 300)
                 {
                     Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).ai[0]++;
+                }
+                if(npc.ai[1] == 300)
+                {
+                    npc.dontTakeDamage = false;
+                    ResetAttack();
+                    npc.ai[2] = 0;
+                }
+                if(npc.ai[1] > 300)
+                {
+                    npc.ai[3]++;
+                    if (npc.ai[2] != 2 && npc.ai[2] != 4) //when not lasering, passive movement
+                    {
+                        npc.velocity += Vector2.Normalize(npc.Center - (Main.player[npc.target].Center + new Vector2(0, 250))) * -0.2f;
+                        if (npc.velocity.Length() > 5) npc.velocity = Vector2.Normalize(npc.velocity) * 5;
+                        npc.rotation = npc.velocity.X * 0.05f;
+                    }
+                    if (npc.ai[3] == 1)
+                    {
+                        npc.ai[2]++;
+                        if (npc.ai[2] > 4)
+                        {
+                            npc.ai[2] = 1;
+                        }
+                    }
+                    switch (npc.ai[2])
+                    {
+                        case 1: Spew(); break;
+                        case 2: Laser(); break;
+                        case 3: Spew(); break;
+                        case 4: Leap(); break;
+                    }
+
                 }
             }
             #endregion
