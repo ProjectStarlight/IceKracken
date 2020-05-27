@@ -56,9 +56,15 @@ namespace IceKracken.Boss
                     {
                         Dust.NewDustPerfect(Tentacles[k].Center + new Vector2(0, -n * 25 + Main.rand.NextFloat(5)), DustID.Fireworks, Vector2.Zero, 0, default, 0.5f);
                     }
+                    Main.PlaySound(SoundID.Drown, npc.Center);
                 }
                 if (npc.ai[3] > k * 100 + 30 && npc.ai[3] < k * 100 + 90) //shooting up, first 30 frames are for tell
                 {
+                    if (npc.ai[3] == k * 100 + 40)
+                    {
+                        Main.PlaySound(SoundID.Splash, npc.Center);
+                        Main.PlaySound(SoundID.Item81, npc.Center);
+                    }
                     int time = (int)npc.ai[3] - (k * 100 + 30);
                     Tentacles[k].Center = Vector2.SmoothStep(tentacle.SavedPoint, tentacle.MovePoint, time / 60f);
                     Tentacles[k].ai[1] += 5f; //make it squirm faster
@@ -76,7 +82,8 @@ namespace IceKracken.Boss
             for (float k = 0; k <= 3.14f; k += 3.14f / 5f)
             {
                 if(npc.ai[3] % 3 == 0) Projectile.NewProjectile(npc.Center + new Vector2(0, 100), new Vector2(-10, 0).RotatedBy(k), ModContent.ProjectileType<InkBlob>(), 10, 0.2f, 255, 0, Main.rand.NextFloat(6.28f));
-                if(npc.ai[3] == 60) ResetAttack();
+                if(npc.ai[3] % 10 == 0) Main.PlaySound(SoundID.Item95, npc.Center);
+                if (npc.ai[3] == 60) ResetAttack();
             }
         }
         private void PlatformSweep()
@@ -91,9 +98,15 @@ namespace IceKracken.Boss
                     tentacle.SavedPoint = Tentacles[k].Center;
                     tentacle.MovePoint = Platforms[k].Center + new Vector2(0, -70);
                 }
+                Main.PlaySound(SoundID.Drown, npc.Center);
             }
             if (npc.ai[3] > 60 && npc.ai[3] < 120) //rising
             {
+                if(npc.ai[3] == 61)
+                {
+                    Main.PlaySound(SoundID.Splash, npc.Center);
+                    Main.PlaySound(SoundID.Item81, npc.Center);
+                }
                 for (int k = 0; k < 4; k++)
                 {
                     Tentacle tentacle = Tentacles[k].modNPC as Tentacle;
@@ -123,6 +136,7 @@ namespace IceKracken.Boss
         {
             if (npc.ai[3] % 100 == 0)
             {
+                Main.PlaySound(SoundID.Item9, npc.Center);
                 for (int k = 0; k < 10; k++)
                 {
                     Projectile.NewProjectile(npc.Center + new Vector2(0, 100), new Vector2(-100 + k * 20, 0), ModContent.ProjectileType<SpewBlob>(), 10, 0.2f);
@@ -132,6 +146,7 @@ namespace IceKracken.Boss
         }
         private void Laser()
         {
+            npc.ai[1]++;
             if(npc.ai[3] == 1)
             {
                 SavedPoint = npc.Center;
@@ -144,12 +159,16 @@ namespace IceKracken.Boss
                 npc.rotation += 3.14f / 59f;
             }
 
-            if(npc.ai[3] == 60) SavedPoint = npc.Center; //leftmost point of laser
+            if (npc.ai[3] == 60)
+            {
+                SavedPoint = npc.Center; //leftmost point of laser
+                Projectile.NewProjectile(npc.Center + new Vector2(0, -200), Vector2.Zero, ModContent.ProjectileType<Laser>(), 10, 0.2f, 255, 0, npc.ai[3] * 0.1f);
+            }
 
             if (npc.ai[3] > 60 && npc.ai[3] < 660) //lasering
             {
+                if(npc.ai[3] % 10 == 0) Main.PlaySound(SoundID.NPCHit53, npc.Center);
                 npc.Center = Vector2.Lerp(SavedPoint, Spawn + new Vector2(800, -500), (npc.ai[3] - 60) / 600f);
-                Projectile.NewProjectile(npc.Center + new Vector2(0, -200), new Vector2(2.6f, -50), ModContent.ProjectileType<InkBlob>(), 10, 0.2f, 255, 0, npc.ai[3] * 0.1f);
             }
 
             if(npc.ai[3] == 660) SavedPoint = npc.Center; //end of laser
@@ -205,6 +224,7 @@ namespace IceKracken.Boss
 
             if (npc.ai[3] == 150)
             {
+                Main.PlaySound(SoundID.NPCDeath24, npc.Center);
                 for (float k = 0; k <= 3.14f; k += 3.14f / 4f)
                 {
                     Projectile.NewProjectile(npc.Center + new Vector2(0, 100), new Vector2(-10, 0).RotatedBy(k), ModContent.ProjectileType<InkBlob>(), 10, 0.2f, 255, 0, Main.rand.NextFloat(6.28f));
@@ -233,6 +253,74 @@ namespace IceKracken.Boss
                 }
             }
             if (npc.ai[3] == 600) ResetAttack();
+        }
+        private void TentacleSpike2()
+        {
+            RandomizeTarget();
+            for (int k = 0; k < 4; k++)
+            {
+                Tentacle tentacle = Tentacles[k].modNPC as Tentacle;
+                if (npc.ai[3] == k * 80 || (k == 0 && npc.ai[3] == 1)) //teleport where needed
+                {
+                    Tentacles[k].Center = new Vector2(Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).Center.X + (k % 2 == 0 ? -600 : 600), npc.Center.Y + Main.rand.Next(-200, 200));
+                    tentacle.SavedPoint = Tentacles[k].Center;
+                    tentacle.MovePoint = Main.player[npc.target].Center;
+
+                    for (int n = 0; n < 50; n++)
+                    {
+                        Dust.NewDustPerfect(Vector2.Lerp(Main.player[npc.target].Center, tentacle.SavedPoint, n / 50f), DustID.Fireworks, Vector2.Zero, 0, default, 0.5f);
+                    }
+                    Main.PlaySound(SoundID.Drown, npc.Center);
+                }
+                if (npc.ai[3] > k * 80 + 30 && npc.ai[3] < k * 80 + 90) //shooting up, first 30 frames are for tell
+                {
+                    if (npc.ai[3] == k * 80 + 40)
+                    {
+                        Main.PlaySound(SoundID.Splash, npc.Center);
+                        Main.PlaySound(SoundID.Item81, npc.Center);
+                    }
+                    int time = (int)npc.ai[3] - (k * 80 + 30);
+                    Tentacles[k].Center = Vector2.SmoothStep(tentacle.SavedPoint, tentacle.MovePoint, time / 50f);
+                    Tentacles[k].ai[1] += 5f; //make it squirm faster
+                }
+                if (npc.ai[3] > k * 80 + 90 && npc.ai[3] < k * 80 + 150) //retracting
+                {
+                    int time = (int)npc.ai[3] - (k * 80 + 90);
+                    Tentacles[k].Center = Vector2.SmoothStep(tentacle.MovePoint, tentacle.SavedPoint, time / 60f);
+                }
+            }
+            if (npc.ai[3] == 400) ResetAttack();
+        }
+        private void StealPlatform()
+        {
+            if (npc.ai[3] == 1)
+            {
+                ShufflePlatforms();
+
+                Tentacle tentacle = Tentacles[0].modNPC as Tentacle;
+                Tentacles[0].Center = new Vector2(Platforms[0].Center.X, Spawn.Y - 100);
+                tentacle.SavedPoint = Tentacles[0].Center;
+                
+            }
+            if(npc.ai[3] < 90)
+            {
+                Dust.NewDust(Platforms[0].position, 200, 16, DustID.Fireworks, 0, 0, 0, default, 0.7f);
+
+                Tentacle tentacle = Tentacles[0].modNPC as Tentacle;
+                Tentacles[0].Center = Vector2.SmoothStep(tentacle.SavedPoint, Platforms[0].Center, npc.ai[3] / 90f);
+            }
+            if (npc.ai[3] == 90)
+            {
+                Tentacle tentacle = Tentacles[0].modNPC as Tentacle;
+                tentacle.MovePoint = Tentacles[0].Center;
+                Platforms[0].ai[3] = 300; //sets it into fall mode
+            }
+            if (npc.ai[3] > 90)
+            {
+                Tentacle tentacle = Tentacles[0].modNPC as Tentacle;
+                Tentacles[0].Center = Vector2.SmoothStep(tentacle.MovePoint, tentacle.SavedPoint, (npc.ai[3] - 90) / 90f);
+            }
+            if (npc.ai[3] == 180) ResetAttack();
         }
     }
 }

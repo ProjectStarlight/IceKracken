@@ -20,6 +20,21 @@ namespace IceKracken.Boss
         public override void SafeAI()
         {
             if (npc.ai[2] == 0) npc.ai[2] = npc.position.Y;
+
+            if (npc.ai[3] != 0)
+            {
+                if (npc.ai[3] > 210)
+                {
+                    npc.position.Y += 8;
+                }
+                if (npc.ai[3] <= 90 && npc.ai[3] > 0)
+                {
+                    npc.position.Y -= 8;
+                }
+                npc.ai[3]--;
+                return;
+            }
+
             if(Main.npc.Any(n => n.active && n.type == ModContent.NPCType<ArenaActor>()))
             {
                 ArenaActor actor = Main.npc.FirstOrDefault(n => n.active && n.type == ModContent.NPCType<ArenaActor>()).modNPC as ArenaActor;
@@ -34,7 +49,7 @@ namespace IceKracken.Boss
                     npc.ai[1] = 1;
                 }
 
-                if (npc.ai[1] == 1)
+                if (npc.ai[1] == 1 && !Main.tile[(int)npc.Center.X / 16, (int)npc.Center.Y / 16 - 5].active())
                 {
                     npc.position.Y = actor.WaterLevel - 16;
                 }

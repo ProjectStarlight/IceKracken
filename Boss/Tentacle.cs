@@ -56,6 +56,12 @@ namespace IceKracken.Boss
                     NPC actor = Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor);
                     underMax = (int)(actor.Center.Y - Parent.npc.Center.Y / 10f);
                 }
+
+                if(Parent.npc.ai[0] == (int)MainBody.AIStates.ThirdPhase && Parent.npc.ai[1] > 240)
+                {
+                    underMax = 0;
+                }
+
                 for (int k = 0; k < underMax; k++)
                 {
                     Vector2 pos = Parent.npc.Center + new Vector2(OffBody - 9 + (float)Math.Sin(npc.ai[1] / 20f + k) * 2, 100 + k * 10);
@@ -63,20 +69,22 @@ namespace IceKracken.Boss
                 }
 
 
-                if (npc.ai[1] > 60)
+                if (npc.ai[1] > 60 && Vector2.Distance(npc.Center, SavedPoint) > 8)
                 {
                     float sin = 1 + (float)Math.Sin(npc.ai[1] / 10f);
                     float cos = 1 + (float)Math.Cos(npc.ai[1] / 10f);
                     Color color2 = new Color(0.5f + cos * 0.2f, 0.8f, 0.5f + sin * 0.2f);
 
-                    spriteBatch.Draw(top, npc.Center - Main.screenPosition, top.Frame(), Lighting.GetColor((int)npc.Center.X / 16, (int)npc.Center.Y / 16) * 2f, 0, top.Size() / 2, 1, 0, 0);
-                    spriteBatch.Draw(glow, npc.Center - Main.screenPosition, glow.Frame(), color2 * 0.6f, 0, top.Size() / 2, 1, 0, 0);
+                    float rot = (SavedPoint - npc.Center).ToRotation() - 1.57f;
+
+                    spriteBatch.Draw(top, npc.Center - Main.screenPosition, top.Frame(), Lighting.GetColor((int)npc.Center.X / 16, (int)npc.Center.Y / 16) * 2f, rot, top.Size() / 2, 1, 0, 0);
+                    spriteBatch.Draw(glow, npc.Center - Main.screenPosition, glow.Frame(), color2 * 0.6f, rot, top.Size() / 2, 1, 0, 0);
                     Lighting.AddLight(npc.Center, color2.ToVector3() * 0.35f);
 
                     for (int k = 0; k < Vector2.Distance(npc.Center + new Vector2(0, npc.height / 2), SavedPoint) / 10f; k++)
                     {
-                        Vector2 pos = new Vector2((float)Math.Sin(npc.ai[1] / 20f + k) * 4, 0) + Vector2.Lerp(npc.Center + new Vector2(0, npc.height / 2), SavedPoint, k / Vector2.Distance(npc.Center + new Vector2(0, npc.height / 2), SavedPoint) * 10f);
-                        spriteBatch.Draw(body, pos - Main.screenPosition, body.Frame(), Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16) * 1.6f, 0, body.Size() / 2, 1, 0, 0);
+                        Vector2 pos = new Vector2((float)Math.Sin(npc.ai[1] / 20f + k) * 4, 0) + Vector2.Lerp(npc.Center + new Vector2(0, npc.height / 2).RotatedBy(rot), SavedPoint, k / Vector2.Distance(npc.Center + new Vector2(0, npc.height / 2), SavedPoint) * 10f);
+                        spriteBatch.Draw(body, pos - Main.screenPosition, body.Frame(), Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16) * 1.6f, rot, body.Size() / 2, 1, 0, 0);
                     }
 
                     Color color;

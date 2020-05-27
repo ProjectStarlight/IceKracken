@@ -22,6 +22,12 @@ namespace IceKracken
         private int ScreenMoveTimer = 0;
 
         public int PlatformTimer { get; set; }
+        public override void SetupStartInventory(IList<Item> items, bool MediumcoreDeath)
+        {
+            Item i = new Item();
+            i.SetDefaults(ModContent.ItemType<Items.StartBag>());
+            items.Add(i);
+        }
         public override void PreUpdate()
         {
             if (PlatformTimer > 0) PlatformTimer--;

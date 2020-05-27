@@ -1,4 +1,4 @@
-displayName = Krack My Nuts
-author = Scalie
-version = 0.1
+displayName = Rise of Auroracle
+author = Scalie, Turqouise, Kiraa
+version = 1.0
 modReferences = StructureHelper

@@ -1,1 +1,1 @@
-Krack My Nuts is a pretty cool mod, it does...this. Modify this file with a description of your mod.
+A small mod made for the first Fluffy Mod Jam under the theme "Destruction below the ice". Adds a single boss which inhabits a large structure under the center of the ice biome, made in one week.

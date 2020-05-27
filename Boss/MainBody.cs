@@ -52,6 +52,7 @@ namespace IceKracken.Boss
                 float sin = 1 + (float)Math.Sin(npc.ai[1] / 10f - k);
                 float cos = 1 + (float)Math.Cos(npc.ai[1] / 10f + k);
                 Color color = new Color(0.5f + cos * 0.2f, 0.8f, 0.5f + sin * 0.2f) * 0.7f;
+                if (npc.ai[0] == (int)AIStates.ThirdPhase) color = new Color(0.8f + sin * 0.1f, 0.3f + sin * -0.25f, 0.05f) * 0.7f;
 
                 spriteBatch.Draw(tex2, rect, tex2.Frame(), color, npc.rotation, tex2.Size() / 2, 0, 0);
             }
@@ -69,7 +70,8 @@ namespace IceKracken.Boss
             SpawnAnimation = 1,
             FirstPhase = 2,
             FirstPhaseTwo = 3,
-            SecondPhase = 4
+            SecondPhase = 4,
+            ThirdPhase = 5
         }
         public override void AI()
         {
@@ -179,6 +181,7 @@ namespace IceKracken.Boss
                 {
                     Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).ai[0]++;
                     npc.Center = Vector2.SmoothStep(Spawn + new Vector2(0, -600), Spawn + new Vector2(0, -750), npc.ai[1] / 325f);
+                    if (npc.ai[1] % 10 == 0) Main.PlaySound(SoundID.Splash, npc.Center);
                 }
                 if(npc.ai[1] == 325)
                 {
@@ -226,6 +229,7 @@ namespace IceKracken.Boss
                 if (npc.ai[1] < 300)
                 {
                     Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).ai[0]++;
+                    if (npc.ai[1] % 10 == 0) Main.PlaySound(SoundID.Splash, npc.Center);
                 }
                 if(npc.ai[1] == 300)
                 {
@@ -235,6 +239,7 @@ namespace IceKracken.Boss
                 }
                 if(npc.ai[1] > 300)
                 {
+                    if (npc.life < npc.lifeMax / 7) npc.dontTakeDamage = true;
                     npc.ai[3]++;
                     if (npc.ai[2] != 2 && npc.ai[2] != 4) //when not lasering, passive movement
                     {
@@ -244,6 +249,16 @@ namespace IceKracken.Boss
                     }
                     if (npc.ai[3] == 1)
                     {
+                        if (npc.life < npc.lifeMax / 7) //phasing logic
+                        {
+                            npc.ai[0] = (int)AIStates.ThirdPhase;
+                            npc.ai[1] = 0;
+                            npc.ai[2] = 0;
+                            ResetAttack();
+
+                            Platforms.RemoveAll(n => Math.Abs(n.Center.X - npc.Center.X) >= 600);
+                            return;
+                        }
                         npc.ai[2]++;
                         if (npc.ai[2] > 4)
                         {
@@ -257,10 +272,55 @@ namespace IceKracken.Boss
                         case 3: Spew(); break;
                         case 4: Leap(); break;
                     }
+                }
+            }    
+            if(npc.ai[0] == (int)AIStates.ThirdPhase)
+            {
+                if(npc.ai[1] == 1)
+                {
+                    npc.velocity *= 0;
+                    npc.rotation = 0;
+                    SavedPoint = npc.Center;
+                }
+                if(npc.ai[1] < 240)
+                {
+                    npc.Center = Vector2.SmoothStep(SavedPoint, Spawn + new Vector2(0, -1400), npc.ai[1] / 240f);
+                }
+                if(npc.ai[1] == 240)
+                {
+                    npc.dontTakeDamage = false;
+                    foreach(Player player in Main.player.Where(n => n.active)) player.GetModPlayer<IcePlayer>().Shake += 40;
+                    Main.PlaySound(SoundID.Roar, npc.Center, 0);
+                }
+                if (npc.ai[1] > 240)
+                {
 
+                    npc.velocity += Vector2.Normalize(npc.Center - (Main.player[npc.target].Center + new Vector2(0, -350))) * -0.3f;
+                    if (npc.velocity.Length() > 7) npc.velocity = Vector2.Normalize(npc.velocity) * 7;
+                    npc.rotation = npc.velocity.X * 0.05f;
+
+
+                    npc.ai[1]++;
+
+                    if (npc.ai[1] % 8 == 0) Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).ai[0]++; //rising water
+                    npc.ai[3]++;
+
+                    if (npc.ai[3] == 1)
+                    {
+                        npc.ai[2]++;
+                        if (npc.ai[2] > 2)
+                        {
+                            npc.ai[2] = 1;
+                        }
+                    }
+                    switch (npc.ai[2])
+                    {
+                        case 1: TentacleSpike2(); break;
+                        case 2: StealPlatform(); break;
+                    }
                 }
             }
-            #endregion
         }
+        #endregion
     }
 }

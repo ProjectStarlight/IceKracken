@@ -9,6 +9,8 @@ using IceKracken.Boss;
 using IceKracken.GUI;
 using System.Collections.Generic;
 using Terraria.UI;
+using IceKracken.BlockMechanic;
+using Terraria.DataStructures;
 
 namespace IceKracken
 {
@@ -37,9 +39,21 @@ namespace IceKracken
 
             On.Terraria.Player.Update_NPCCollision += PlatformCollision;
             On.Terraria.Main.DrawInterface += DrawBlingBlingBoy;
+            On.Terraria.Player.PlaceThing += PlacementRestriction;
 
             IL.Terraria.Projectile.VanillaAI += GrapplePlatforms;
             IL.Terraria.Main.DoDraw += DrawWater;
+        }
+
+        private void PlacementRestriction(On.Terraria.Player.orig_PlaceThing orig, Terraria.Player self)
+        {
+            Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
+            if (tile.wall == ModContent.WallType<BrickWall>() &&
+                !Main.projectile.Any(n => n.active && n.timeLeft > 10 && n.modProjectile is InteractiveProjectile && (n.modProjectile as InteractiveProjectile).ValidPoints.Contains(new Point16(Player.tileTargetX, Player.tileTargetY))))
+            {
+                return;
+            }
+            else orig(self);
         }
 
         private void DrawBlingBlingBoy(On.Terraria.Main.orig_DrawInterface orig, Main self, GameTime gameTime)
@@ -147,14 +161,17 @@ namespace IceKracken
                 {
                     (npc2.modNPC as IUnderwater).DrawUnderWater(Main.spriteBatch);
                 }
-                foreach (NPC npc3 in Main.npc.Where(n => n.active && n.modNPC is MainBody))
-                {
-                    (npc3.modNPC as IUnderwater).DrawUnderWater(Main.spriteBatch);
-                }
+
                 foreach (Projectile proj in Main.projectile.Where(n => n.active && n.modProjectile is IUnderwater))
                 {
                     (proj.modProjectile as IUnderwater).DrawUnderWater(Main.spriteBatch);
                 }
+
+                foreach (NPC npc3 in Main.npc.Where(n => n.active && n.modNPC is MainBody))
+                {
+                    (npc3.modNPC as IUnderwater).DrawUnderWater(Main.spriteBatch);
+                }
+
 
                 (Main.npc.FirstOrDefault(n => n.active && n.modNPC is ArenaActor).modNPC as ArenaActor).SpecialDraw(Main.spriteBatch);
             }
