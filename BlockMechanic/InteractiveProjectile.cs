@@ -14,12 +14,17 @@ namespace IceKracken.BlockMechanic
     public abstract class InteractiveProjectile : ModProjectile
     {
         public List<Point16> ValidPoints { get; set; } = new List<Point16>(); //the points this projectile allows tile placement at
-        public override void Kill(int timeLeft)
+        public virtual void SafeKill(int timeLeft) { }
+        public sealed override void Kill(int timeLeft)
         {
+            SafeKill(timeLeft);
             if (ValidPoints.Count(n => Main.tile[n.X, n.Y].active()) == ValidPoints.Count) GoodEffects();
             else BadEffects();
 
-
+            foreach (Point16 point in ValidPoints)
+            {
+                WorldGen.KillTile(point.X, point.Y);
+            }
         }
         public sealed override void PostAI() //need to do this early to make sure all blocks get cucked
         {

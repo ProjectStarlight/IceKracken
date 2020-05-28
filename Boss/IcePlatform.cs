@@ -23,13 +23,13 @@ namespace IceKracken.Boss
 
             if (npc.ai[3] != 0)
             {
-                if (npc.ai[3] > 210)
+                if (npc.ai[3] > 360)
                 {
                     npc.position.Y += 8;
                 }
                 if (npc.ai[3] <= 90 && npc.ai[3] > 0)
                 {
-                    npc.position.Y -= 8;
+                    npc.position.Y -= 9;
                 }
                 npc.ai[3]--;
                 return;
@@ -49,7 +49,7 @@ namespace IceKracken.Boss
                     npc.ai[1] = 1;
                 }
 
-                if (npc.ai[1] == 1 && !Main.tile[(int)npc.Center.X / 16, (int)npc.Center.Y / 16 - 5].active())
+                if (npc.ai[1] == 1 && (!Main.tile[(int)npc.Center.X / 16, (int)npc.Center.Y / 16 - 5].active() || actor.WaterLevel - 16 > npc.position.Y))
                 {
                     npc.position.Y = actor.WaterLevel - 16;
                 }

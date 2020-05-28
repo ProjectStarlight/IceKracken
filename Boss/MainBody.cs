@@ -256,7 +256,7 @@ namespace IceKracken.Boss
                             npc.ai[2] = 0;
                             ResetAttack();
 
-                            Platforms.RemoveAll(n => Math.Abs(n.Center.X - npc.Center.X) >= 600);
+                            Platforms.RemoveAll(n => Math.Abs(n.Center.X - Main.npc.FirstOrDefault(l => l.active && l.modNPC is ArenaActor).Center.X) >= 550);
                             return;
                         }
                         npc.ai[2]++;
@@ -294,10 +294,12 @@ namespace IceKracken.Boss
                 }
                 if (npc.ai[1] > 240)
                 {
-
-                    npc.velocity += Vector2.Normalize(npc.Center - (Main.player[npc.target].Center + new Vector2(0, -350))) * -0.3f;
-                    if (npc.velocity.Length() > 7) npc.velocity = Vector2.Normalize(npc.velocity) * 7;
-                    npc.rotation = npc.velocity.X * 0.05f;
+                    if (npc.ai[2] != 3)
+                    {
+                        npc.velocity += Vector2.Normalize(npc.Center - (Main.player[npc.target].Center + new Vector2(0, -350))) * -0.3f;
+                        if (npc.velocity.Length() > 7) npc.velocity = Vector2.Normalize(npc.velocity) * 7;
+                        npc.rotation = npc.velocity.X * 0.05f;
+                    }
 
 
                     npc.ai[1]++;
@@ -308,7 +310,7 @@ namespace IceKracken.Boss
                     if (npc.ai[3] == 1)
                     {
                         npc.ai[2]++;
-                        if (npc.ai[2] > 2)
+                        if (npc.ai[2] > 3)
                         {
                             npc.ai[2] = 1;
                         }
@@ -317,6 +319,7 @@ namespace IceKracken.Boss
                     {
                         case 1: TentacleSpike2(); break;
                         case 2: StealPlatform(); break;
+                        case 3: InkBurst2(); break;
                     }
                 }
             }

@@ -16,11 +16,11 @@ namespace IceKracken.Boss
         private void RandomizeTarget()
         {
             List<int> possible = new List<int>();
-            foreach(Player player in Main.player.Where(n => Vector2.Distance(n.Center, npc.Center) < 1500))
+            foreach (Player player in Main.player.Where(n => Vector2.Distance(n.Center, npc.Center) < 1500))
             {
                 possible.Add(player.whoAmI);
             }
-            if (possible.Count == 0) npc.active = false;
+            if (possible.Count == 0) {npc.active = false; return; }
             npc.target = possible[Main.rand.Next(possible.Count - 1)];
         }
         private void ResetAttack()
@@ -313,7 +313,7 @@ namespace IceKracken.Boss
             {
                 Tentacle tentacle = Tentacles[0].modNPC as Tentacle;
                 tentacle.MovePoint = Tentacles[0].Center;
-                Platforms[0].ai[3] = 300; //sets it into fall mode
+                Platforms[0].ai[3] = 450; //sets it into fall mode
             }
             if (npc.ai[3] > 90)
             {
@@ -321,6 +321,27 @@ namespace IceKracken.Boss
                 Tentacles[0].Center = Vector2.SmoothStep(tentacle.MovePoint, tentacle.SavedPoint, (npc.ai[3] - 90) / 90f);
             }
             if (npc.ai[3] == 180) ResetAttack();
+        }
+        private void InkBurst2()
+        {
+            if (npc.ai[3] == 1)
+            {
+                npc.velocity *= 0;
+                npc.velocity.Y = -10;
+            }
+            if(npc.ai[3] <= 61)
+            {
+                npc.velocity.Y += 10 / 60f;
+            }
+            if (npc.ai[3] > 61)
+            {
+                for (float k = 0; k <= 3.14f; k += 2.14f / 3f)
+                {
+                    if (npc.ai[3] % 3 == 0) Projectile.NewProjectile(npc.Center + new Vector2(0, 100), new Vector2(10, 0).RotatedBy(k), ModContent.ProjectileType<InkBlob>(), 10, 0.2f, 255, 0, Main.rand.NextFloat(6.28f));
+                    if (npc.ai[3] % 10 == 0) Main.PlaySound(SoundID.Item95, npc.Center);
+                }
+            }
+            if (npc.ai[3] == 76) ResetAttack();
         }
     }
 }

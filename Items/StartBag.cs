@@ -25,7 +25,7 @@ namespace IceKracken.Items
         public override bool CanRightClick() => true;
         public override void RightClick(Player player)
         {
-            Vector2 pos = IceWorld.IceZone.TopLeft() * 16 + new Microsoft.Xna.Framework.Vector2(500, 200);
+            Vector2 pos = IceWorld.IceZone.TopLeft() * 16 + new Microsoft.Xna.Framework.Vector2(840, -680);
             player.statLifeMax = 200;
             player.statManaMax = 200;
             player.SpawnX = (int)pos.X / 16;

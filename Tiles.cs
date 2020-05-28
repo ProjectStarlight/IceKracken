@@ -54,4 +54,37 @@ namespace IceKracken
             dustType = DustID.Stone;
         }
     }
+    class Brick2 : ModTile
+    {
+        public override bool Autoload(ref string name, ref string texture)
+        {
+            texture = "IceKracken/Brick";
+            return base.Autoload(ref name, ref texture);
+        }
+        public override void SetDefaults()
+        {
+            Main.tileSolid[Type] = true;
+            Main.tileBlockLight[Type] = true;
+            minPick = 100;
+            soundType = SoundID.Tink;
+            dustType = DustID.Stone;
+        }
+        public override void NearbyEffects(int i, int j, bool closer)
+        {
+            if (IceWorld.BossOpen) Main.tile[i, j].inActive(true);
+            else Main.tile[i, j].inActive(false);
+        }
+    }
+    public class BrickPlacer2 : ModItem
+    {
+        public override string Texture => "IceKracken/Items/NutKracker";
+        public override void SetDefaults()
+        {
+            item.useStyle = 1;
+            item.useTime = 2;
+            item.useAnimation = 2;
+            item.createTile = ModContent.TileType<Brick2>();
+            item.autoReuse = true;
+        }
+    }
 }

@@ -157,12 +157,12 @@ namespace IceKracken.Boss
             {
                 for (int y = 0; y < tex.Height / 16; y++)
                 {
-                    Vector2 pos = npc.Center - (tex.Size() / 2) + new Vector2(x, y) * 16;
+                    Vector2 pos = npc.Center - (tex.Size() / 2) + new Vector2(x, y - 7) * 16;
                     spriteBatch.Draw(tex, pos - Main.screenPosition, new Rectangle(x * 16, y * 16, 16, 16), Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16), 0, Vector2.Zero, 1, 0, 0);
                 }
             }
             Texture2D tex2 = ModContent.GetTexture("IceKracken/Boss/WindowIn");
-            spriteBatch.Draw(tex2, npc.Center - Main.screenPosition, null, Color.White * 0.4f, 0, tex2.Size() / 2, 1, 0, 0);
+            spriteBatch.Draw(tex2, npc.Center + new Vector2(0, -7 * 16) - Main.screenPosition, null, Color.White * 0.4f, 0, tex2.Size() / 2, 1, 0, 0);
 
             spriteBatch.End();
             spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.Additive);

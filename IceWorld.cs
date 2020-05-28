@@ -18,6 +18,7 @@ namespace IceKracken
     class IceWorld : ModWorld
     {
         public static Rectangle IceZone = new Rectangle();
+        public static bool BossOpen;
         #region Worldgen
         public override void ModifyWorldGenTasks(List<GenPass> tasks, ref float totalWeight)
         {
@@ -38,7 +39,7 @@ namespace IceKracken
             int bottom = FindIceDepth(center);
 
             IceZone = new Rectangle(center - 40, bottom - 100, 80, 200);
-            StructureHelper.StructureHelper.GenerateStructure("SquidTemple", new Point16(center - 40, bottom - 100), mod);
+            StructureHelper.StructureHelper.GenerateStructure("SquidTemple", new Point16(center - 40, bottom - 150), mod);
         }
         private int FindIceDepth(int start)
         {
@@ -94,12 +95,14 @@ namespace IceKracken
                 ["Left"] = IceZone.X,
                 ["Top"] = IceZone.Y,
                 ["Width"] = IceZone.Width,
-                ["Height"] = IceZone.Height
+                ["Height"] = IceZone.Height,
+                ["Open"] = BossOpen
             };
         }
         public override void Load(TagCompound tag)
         {
             IceZone = new Rectangle(tag.GetInt("Left"), tag.GetInt("Top"), tag.GetInt("Width"), tag.GetInt("Height"));
+            BossOpen = tag.GetBool("Open");
         }
     }
 }

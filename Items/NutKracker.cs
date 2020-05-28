@@ -54,6 +54,7 @@ namespace IceKracken.Items
                     actor.npc.ai[0] ++;
                 }
             }
+            IceWorld.BossOpen = false;
             return true;
         }
         public override bool AltFunctionUse(Player player) => true;
