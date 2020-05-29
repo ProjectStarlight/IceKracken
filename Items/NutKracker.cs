@@ -55,6 +55,7 @@ namespace IceKracken.Items
                 }
             }
             IceWorld.BossOpen = false;
+            IceWorld.BossDowned = false;
             return true;
         }
         public override bool AltFunctionUse(Player player) => true;

@@ -79,7 +79,7 @@ namespace IceKracken.Boss
                 Dust.NewDust(npc.position, npc.width, npc.height, Terraria.ID.DustID.Ice);
                 npc.ai[1]++;
             }
-            else npc.ai[1] = 0;
+            else if(npc.ai[1] > 0 )npc.ai[1]--;
 
             if(npc.ai[1] >= 20)
             {
@@ -87,6 +87,35 @@ namespace IceKracken.Boss
                     npc.velocity.Y += 0.3f;
             }
             else if (npc.position.Y > npc.ai[0]) npc.velocity.Y = -1;
+            else npc.velocity.Y = 0;
+        }
+    }
+
+    class GoldPlatform : MovingPlatform, IUnderwater
+    {
+        public override bool PreDraw(SpriteBatch spriteBatch, Color drawColor) => false;
+        public void DrawUnderWater(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(ModContent.GetTexture(Texture), npc.position - Main.screenPosition, Lighting.GetColor((int)npc.Center.X / 16, (int)npc.Center.Y / 16));
+        }
+
+        public override void SafeSetDefaults()
+        {
+            npc.width = 200;
+            npc.height = 20;
+        }
+        public override void SafeAI()
+        {
+            if (npc.ai[0] == 0) npc.ai[0] = npc.position.Y;
+
+            if (Main.player.Any(player => player.active && player.Hitbox.Intersects(npc.Hitbox)) && IceWorld.BossOpen)
+            {
+                if (npc.velocity.Y < 1.5f)
+                    npc.velocity.Y += 0.02f;
+
+                if (npc.position.Y - npc.ai[0] > 1600) npc.velocity.Y = 0;
+            }
+            else if (npc.position.Y > npc.ai[0]) npc.velocity.Y = -6;
             else npc.velocity.Y = 0;
         }
     }

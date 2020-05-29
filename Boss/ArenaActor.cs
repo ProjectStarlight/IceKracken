@@ -71,6 +71,8 @@ namespace IceKracken.Boss
 
                 SpawnPlatform(-340, 240, true);
                 SpawnPlatform(340, 240, true);
+
+                NPC.NewNPC((int)(npc.Center.X), (int)(npc.Center.Y - 2000), ModContent.NPCType<GoldPlatform>());
             }
 
             Vector2 pos = npc.Center + new Vector2(-1600, 35 * 16) + new Vector2(0, -npc.ai[0]);
@@ -87,8 +89,7 @@ namespace IceKracken.Boss
                     Lighting.AddLight(target, new Vector3(10 * (1 + sin2), 14 * (1 + cos), 18) * (0.02f + sin * 0.003f));
                 }
             }
-
-            for(int k = 0; k < 10; k++)
+            for (int k = 0; k < 10; k++)
             {
                 Lighting.AddLight(npc.Center + new Vector2(0, -200 + k * 60), new Vector3(1, 1, 1) * 0.4f);
                 Lighting.AddLight(npc.Center + new Vector2(-400, -200 + k * 60), new Vector3(1, 1, 1) * 0.2f);
@@ -105,7 +106,8 @@ namespace IceKracken.Boss
             {
                 if(Main.player.Any(n => n.Hitbox.Intersects(new Rectangle((int)pos.X, (int)pos.Y, 200 * 16, (int)npc.ai[0]))))
                 {
-                    NPC.NewNPC((int)npc.Center.X, (int)npc.Center.Y + 650, ModContent.NPCType<MainBody>());
+                    Main.LocalPlayer.GetModPlayer<IcePlayer>().Shake += 30;
+                    NPC.NewNPC((int)npc.Center.X, (int)npc.Center.Y + 630, ModContent.NPCType<MainBody>());
                 }
             }
         }
@@ -179,6 +181,64 @@ namespace IceKracken.Boss
 
             spriteBatch.End();
             spriteBatch.Begin();
+
+            DrawWindow(spriteBatch, new Vector2(0, -70), new Color(255, 200, 255));
+
+            DrawWindow(spriteBatch, new Vector2(-20, -65), new Color(200, 255, 200));
+            DrawWindow(spriteBatch, new Vector2(-11, -105), new Color(200, 255, 255));
+
+            DrawWindow(spriteBatch, new Vector2(20, -65), new Color(200, 255, 200));
+            DrawWindow(spriteBatch, new Vector2(11, -105), new Color(200, 255, 255));
+        }
+        private void DrawWindow(SpriteBatch spriteBatch, Vector2 off, Color color)
+        {
+            Texture2D tex5 = ModContent.GetTexture("IceKracken/Boss/SmallWindowIn");
+            Texture2D tex6 = ModContent.GetTexture("IceKracken/Boss/TentacleGlow");
+            Texture2D tex7 = ModContent.GetTexture("IceKracken/Boss/TentacleTop");
+            Texture2D tex8 = ModContent.GetTexture("IceKracken/Boss/TentacleBody");
+            Texture2D tex9 = ModContent.GetTexture("IceKracken/Boss/BodyUnder");
+
+            spriteBatch.Draw(tex5, npc.Center + new Vector2(off.X * 16, off.Y * 16) + Vector2.One.RotatedBy(npc.ai[1] * 2) * 2 - Main.screenPosition, null, new Color(70, 95, 125), 0, tex5.Size() / 2, 1, 0, 0);
+
+            if (!Main.npc.Any(n => n.active && n.modNPC is MainBody) && !IceWorld.BossDowned)
+            {
+                if (off.X == 0)
+                {
+                    Vector2 tentaclePos = new Vector2(off.X * 16 + (float)Math.Cos(npc.ai[1] + off.X * 0.2f) * 5, off.Y * 16 + (float)Math.Sin(npc.ai[1] + off.X * 0.2f) * 2);
+                    spriteBatch.Draw(tex9, npc.Center + tentaclePos + new Vector2(0, 260) - Main.screenPosition, new Rectangle(48, 0, 128, 100), Color.White, 0, new Vector2(64, 50), 1, 0, 0);
+                }
+                else
+                {
+                    Vector2 tentaclePos = new Vector2(off.X * 16 + (float)Math.Cos(npc.ai[1] + off.X * 0.2f) * 20, off.Y * 16 + (float)Math.Sin(npc.ai[1] + off.X * 0.2f) * 5);
+                    for (int k = 0; k < 32; k++)
+                    {
+                        spriteBatch.Draw(tex8, npc.Center + Vector2.Lerp(tentaclePos, off * 16 + new Vector2((float)Math.Sin(npc.ai[1] + k * 0.5f) * 5, 200), k / 20f) - Main.screenPosition, null, Color.White, 0, tex8.Size() / 2, 1, 0, 0);
+                    }
+                    float tentacleRot = ((npc.Center + tentaclePos) - (npc.Center + off * 16 + new Vector2(0, 200))).ToRotation() + 1.57f;
+                    spriteBatch.Draw(tex6, npc.Center + tentaclePos - Main.screenPosition, null, Color.White, tentacleRot, tex6.Size() / 2, 1, 0, 0);
+                    spriteBatch.Draw(tex7, npc.Center + tentaclePos - Main.screenPosition, null, Color.White, tentacleRot, tex6.Size() / 2, 1, 0, 0);
+                }
+            }
+
+            spriteBatch.Draw(tex5, npc.Center + new Vector2(off.X * 16, off.Y * 16) - Main.screenPosition, null, color * 0.5f, 0, tex5.Size() / 2, 1, 0, 0);
+
+            for(int k = 0; k < 5; k++)
+            {
+                Lighting.AddLight(npc.Center + new Vector2(off.X * 16, off.Y * 16) + new Vector2(0, -100 + k * 50), color.ToVector3() * 0.5f);
+            }
+
+            Texture2D tex4 = ModContent.GetTexture("IceKracken/Boss/SmallWindow");
+            for (int x = 0; x < tex4.Width / 16; x++)
+            {
+                for (int y = 0; y < tex4.Height / 16; y++)
+                {
+                    Vector2 pos = npc.Center - (tex4.Size() / 2) + new Vector2(x + off.X, y + off.Y) * 16;
+                    spriteBatch.Draw(tex4, pos - Main.screenPosition, new Rectangle(x * 16, y * 16, 16, 16), Lighting.GetColor((int)pos.X / 16, (int)pos.Y / 16), 0, Vector2.Zero, 1, 0, 0);
+                }
+            }
+
+            Dust d = Dust.NewDustPerfect(npc.Center + off * 16 + new Vector2(Main.rand.Next(-60, 60), 300 - Main.rand.Next(400)), 257, new Vector2(0, -2), 200, color * 1.8f, 1);
+            d.noGravity = true;
         }
 
         private void SpawnPlatform(int x, int y, bool small = false)

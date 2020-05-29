@@ -19,6 +19,7 @@ namespace IceKracken
     {
         public static Rectangle IceZone = new Rectangle();
         public static bool BossOpen;
+        public static bool BossDowned;
         #region Worldgen
         public override void ModifyWorldGenTasks(List<GenPass> tasks, ref float totalWeight)
         {
@@ -84,7 +85,7 @@ namespace IceKracken
         {
             if(!Main.npc.Any(n => n.active && n.type == ModContent.NPCType<Boss.ArenaActor>()))
             {
-                NPC.NewNPC(IceZone.Center.X * 16 + 200, IceZone.Center.Y * 16 - 352, ModContent.NPCType<Boss.ArenaActor>());
+                NPC.NewNPC(IceZone.Center.X * 16 + 232, IceZone.Center.Y * 16 - 64, ModContent.NPCType<Boss.ArenaActor>());
             }
         }
 
@@ -96,13 +97,15 @@ namespace IceKracken
                 ["Top"] = IceZone.Y,
                 ["Width"] = IceZone.Width,
                 ["Height"] = IceZone.Height,
-                ["Open"] = BossOpen
+                ["Open"] = BossOpen,
+                ["Downed"] = BossDowned
             };
         }
         public override void Load(TagCompound tag)
         {
             IceZone = new Rectangle(tag.GetInt("Left"), tag.GetInt("Top"), tag.GetInt("Width"), tag.GetInt("Height"));
             BossOpen = tag.GetBool("Open");
+            BossDowned = tag.GetBool("Downed");
         }
     }
 }

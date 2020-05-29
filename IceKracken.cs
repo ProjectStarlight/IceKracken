@@ -47,8 +47,6 @@ namespace IceKracken
 
         private void PlacementRestriction(On.Terraria.Player.orig_PlaceThing orig, Terraria.Player self)
         {
-            orig(self);
-            return;
             Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
             if (tile.wall == ModContent.WallType<BrickWall>() &&
                 !Main.projectile.Any(n => n.active && n.timeLeft > 10 && n.modProjectile is InteractiveProjectile && (n.modProjectile as InteractiveProjectile).ValidPoints.Contains(new Point16(Player.tileTargetX, Player.tileTargetY))))

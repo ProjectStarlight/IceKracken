@@ -27,7 +27,7 @@ namespace IceKracken
         public override void SetDefaults()
         {
             Main.wallHouse[Type] = false;
-            AddMapEntry(new Color(65, 70, 75));
+            AddMapEntry(new Color(50, 90, 120));
         }
     }
 
@@ -52,6 +52,11 @@ namespace IceKracken
             minPick = 100;
             soundType = SoundID.Tink;
             dustType = DustID.Stone;
+            AddMapEntry(new Color(100, 150, 255));
+        }
+        public override void NearbyEffects(int i, int j, bool closer)
+        {
+            Lighting.AddLight(new Vector2(i, j) * 16, new Vector3(1, 1, 1) * 0.01f);
         }
     }
     class Brick2 : ModTile
@@ -71,7 +76,7 @@ namespace IceKracken
         }
         public override void NearbyEffects(int i, int j, bool closer)
         {
-            if (IceWorld.BossOpen) Main.tile[i, j].inActive(true);
+            if (IceWorld.BossOpen && !Main.npc.Any(n => n.active && n.modNPC is Boss.MainBody)) Main.tile[i, j].inActive(true);
             else Main.tile[i, j].inActive(false);
         }
     }
