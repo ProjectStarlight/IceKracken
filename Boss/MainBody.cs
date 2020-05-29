@@ -61,10 +61,10 @@ namespace IceKracken.Boss
             spriteBatch.Draw(tex, npc.Center - Main.screenPosition, tex.Frame(), Color.White, npc.rotation, tex.Size() / 2, 1, 0, 0);
         }
         public override bool PreDraw(SpriteBatch spriteBatch, Color drawColor) => false;
-        public override bool CheckDead()
+        public override void NPCLoot()
         {
             IceWorld.BossDowned = true;
-            return true;
+            Item.NewItem(npc.Center, ModContent.ItemType<Items.TentacleSpear>());
         }
         #endregion
 

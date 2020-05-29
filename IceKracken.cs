@@ -21,6 +21,7 @@ namespace IceKracken
 
         public LifeBar lifeBar;
         UserInterface customResourcesBar;
+        private int BlingBlingTimer;
 
         public static IceKracken Instance { get; set; }
         public IceKracken()
@@ -45,25 +46,6 @@ namespace IceKracken
             IL.Terraria.Main.DoDraw += DrawWater;
         }
 
-        private void PlacementRestriction(On.Terraria.Player.orig_PlaceThing orig, Terraria.Player self)
-        {
-            Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
-            if (tile.wall == ModContent.WallType<BrickWall>() &&
-                !Main.projectile.Any(n => n.active && n.timeLeft > 10 && n.modProjectile is InteractiveProjectile && (n.modProjectile as InteractiveProjectile).ValidPoints.Contains(new Point16(Player.tileTargetX, Player.tileTargetY))))
-            {
-                return;
-            }
-            else orig(self);
-        }
-
-        private void DrawBlingBlingBoy(On.Terraria.Main.orig_DrawInterface orig, Main self, GameTime gameTime)
-        {
-            orig(self, gameTime);
-            Main.spriteBatch.Begin();
-            //if(Main.rand.Next(10) == 0)
-            Main.spriteBatch.Draw(ModContent.GetTexture("IceKracken/Bling"), new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * 0f);
-            Main.spriteBatch.End();
-        }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
@@ -90,7 +72,18 @@ namespace IceKracken
                 return true;
             }, InterfaceScaleType.UI));
         }
-
+        public override void UpdateMusic(ref int music, ref MusicPriority priority)
+        {
+            if (Main.myPlayer != -1 && !Main.gameMenu && Main.LocalPlayer.active)
+            {
+                Player player = Main.LocalPlayer;
+                if (Main.tile[(int)player.Center.X / 16, (int)player.Center.Y / 16].wall == ModContent.WallType<BrickWall>() && !IceWorld.BossDowned)
+                {
+                    music = GetSoundSlot(SoundType.Music, "Sounds/Music/SquidArena");
+                    priority = MusicPriority.BiomeHigh;
+                }
+            }
+        }
 
 
         #region IL
@@ -180,6 +173,30 @@ namespace IceKracken
 
         #endregion
         #region On.
+        private void PlacementRestriction(On.Terraria.Player.orig_PlaceThing orig, Terraria.Player self)
+        {
+            Tile tile = Main.tile[Player.tileTargetX, Player.tileTargetY];
+            if (tile.wall == ModContent.WallType<BrickWall>() &&
+                !Main.projectile.Any(n => n.active && n.timeLeft > 10 && n.modProjectile is InteractiveProjectile && (n.modProjectile as InteractiveProjectile).ValidPoints.Contains(new Point16(Player.tileTargetX, Player.tileTargetY))))
+            {
+                return;
+            }
+            else orig(self);
+        }
+
+        private void DrawBlingBlingBoy(On.Terraria.Main.orig_DrawInterface orig, Main self, GameTime gameTime)
+        {
+            orig(self, gameTime);
+            if (IceWorld.BossDowned) BlingBlingTimer++;
+            if (BlingBlingTimer > 6000)
+            {
+                Main.spriteBatch.Begin();
+                Main.spriteBatch.Draw(ModContent.GetTexture("IceKracken/Bling"), new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * ((BlingBlingTimer - 6000) / 60000f));
+                Main.spriteBatch.End();
+            }
+
+
+        }
         private void PlatformCollision(On.Terraria.Player.orig_Update_NPCCollision orig, Player self)
         {
             if (self.controlDown) self.GetModPlayer<IcePlayer>().PlatformTimer = 5;
