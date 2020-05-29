@@ -188,7 +188,7 @@ namespace IceKracken
         {
             orig(self, gameTime);
             if (IceWorld.BossDowned) BlingBlingTimer++;
-            if (BlingBlingTimer > 6000)
+            if (BlingBlingTimer > 6000 && IceWorld.BossDowned)
             {
                 Main.spriteBatch.Begin();
                 Main.spriteBatch.Draw(ModContent.GetTexture("IceKracken/Bling"), new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * ((BlingBlingTimer - 6000) / 60000f));

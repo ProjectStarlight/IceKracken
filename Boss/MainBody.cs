@@ -19,7 +19,6 @@ namespace IceKracken.Boss
         Vector2 SavedPoint;
 
         #region TML hooks
-        public override string Texture => "IceKracken/Invisible";
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Auroracle");
@@ -30,14 +29,18 @@ namespace IceKracken.Boss
             npc.width = 80;
             npc.height = 80;
             npc.boss = true;
-            npc.damage = 0;
+            npc.damage = 1;
             npc.noGravity = true;
             npc.aiStyle = -1;
-            npc.npcSlots = 100;
+            npc.npcSlots = 15f;
             music = mod.GetSoundSlot(SoundType.Music, "Sounds/Music/SquidBoss");
             npc.noTileCollide = true;
             npc.knockBackResist = 0;
             npc.dontTakeDamage = true;
+        }
+        public override void ScaleExpertStats(int numPlayers, float bossLifeScale)
+        {
+            npc.lifeMax = (int)(6500 * bossLifeScale);
         }
         public override bool CheckActive() => false;
         public void DrawUnderWater(SpriteBatch spriteBatch)
@@ -59,6 +62,11 @@ namespace IceKracken.Boss
 
             Texture2D tex = ModContent.GetTexture("IceKracken/Boss/BodyUnder");
             spriteBatch.Draw(tex, npc.Center - Main.screenPosition, tex.Frame(), Color.White, npc.rotation, tex.Size() / 2, 1, 0, 0);
+            if(npc.ai[0] >= (int)AIStates.SecondPhase)
+            {
+                Texture2D tex2 = ModContent.GetTexture(Texture);
+                spriteBatch.Draw(tex2, npc.Center - Main.screenPosition, tex2.Frame(), Color.White, npc.rotation, tex2.Size() / 2, 1, 0, 0);
+            }
         }
         public override bool PreDraw(SpriteBatch spriteBatch, Color drawColor) => false;
         public override void NPCLoot()
@@ -91,6 +99,7 @@ namespace IceKracken.Boss
             {
                 npc.ai[0] = (int)AIStates.SpawnAnimation;
 
+                npc.damage = 0;
                 foreach (NPC npc in Main.npc.Where(n => n.active && n.modNPC is IcePlatform)) Platforms.Add(npc);
 
                 Spawn = npc.Center;
